@@ -51,6 +51,9 @@ TPP_TOF theTOF;
 #define TRIGGER_PIN A5
 #define KILL_BUTTON_PIN A4
 
+// use D7 LED for status
+const int LED_PIN = D7;
+
 const long IDLE_SEQUENCE_MIN_WAIT_MS = 10000; //30 sec // during idle times, random activity will happen longer than this
 
 SerialLogHandler logHandler1(LOG_LEVEL_INFO, {  // Logging level for non-application messages LOG_LEVEL_ALL or _INFO
@@ -117,6 +120,11 @@ void setup() {
 
     pinMode(TRIGGER_PIN, INPUT);
     pinMode(KILL_BUTTON_PIN,INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+
+    // indicate we are in set up mode
+    toggleD7();
+    
 
     delay(1000);
     mainLog.info("===========================================");
@@ -167,7 +175,8 @@ void setup() {
 
 #endif
 
-
+    //we are out of void setup()
+    toggleD7();
     
 }
 
@@ -238,7 +247,7 @@ void loop() {
                 animation1.clearSceneList();
                 animation1.addScene(sceneEyesOpen, 100 , MOVE_SPEED_IMMEDIATE, -1);
                 animation1.addScene(sceneEyesLeftRight, xPos, MOVE_SPEED_IMMEDIATE, -1);
-                animation1.addScene(sceneEyesUpDown, yPos, MOVE_SPEED_IMMEDIATE, 0);
+                animation1.addScene(sceneEyesUpDown, yPos, MOVE_SPEED_IMMEDIATE, -1);
 
                 //now let the animation run
                 animation1.startRunning();
@@ -688,4 +697,21 @@ int switchReadStateBUTTON_PIN() {
     }
 
     return switchState;
+}
+
+// Change state of D7 LED
+void toggleD7() {
+
+    static bool currentState = false;
+    static bool firstCall = true;
+
+    if (firstCall) {
+        digitalWrite(LED_PIN, false);
+        firstCall = false;
+        currentState = false;
+    }
+    
+    currentState = !currentState;
+    digitalWrite(LED_PIN, currentState);
+
 }
