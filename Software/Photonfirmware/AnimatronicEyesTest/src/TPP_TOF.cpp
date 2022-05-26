@@ -32,6 +32,9 @@ const uint16_t MAX_CALIBRATION = 2000;  // anything greater is set to 2000 mm
 // declare 8x8 array of calibration values
 int32_t calibration[64];
 
+// how often sensor gets new data
+const uint16_t RANGING_FREQUENCY = 8;  // between 1 and 14 hertz
+
 int imageResolution; // read this back from the sensor
 int imageWidth; // read this back from the sensor
 
@@ -67,7 +70,7 @@ void TPP_TOF::initTOF(){
     // myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::CLOSEST);
     // myImager.setTargetOrder(SF_VL53L5CX_TARGET_ORDER::STRONGEST);
 
-    myImager.setRangingFrequency(16);
+    myImager.setRangingFrequency(RANGING_FREQUENCY);
 
     myImager.startRanging();
 
@@ -247,6 +250,23 @@ void TPP_TOF::moveTerminalCursorDown(int numlines) {
 // called anytime to have sensor read and interpret its zone data
 // returns the current Point Of Interest
 void TPP_TOF::getPOI(pointOfInterest *pPOI){
+
+    // NOTE EARLY RETURN
+    // if we are called faster than the TOF sensor is sensing, just return no hit
+    int minMSBetweenCalls = 1000/RANGING_FREQUENCY;
+    static uint32_t lastTOFCheckMS = millis();
+   
+    uint32_t elapsedTimeMS = millis() - lastTOFCheckMS;
+    
+    if ( elapsedTimeMS < minMSBetweenCalls ) {
+        pPOI->detectedAtMS = millis();
+        pPOI->distanceMM = -1;
+        pPOI->x = -255;
+        pPOI->y = -255;
+        return;
+    }
+
+    lastTOFCheckMS = millis();
 
     int32_t smallestValue = MAX_CALIBRATION; 
     static int32_t focusX = -255;
