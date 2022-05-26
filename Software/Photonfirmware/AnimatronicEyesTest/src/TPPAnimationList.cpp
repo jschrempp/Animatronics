@@ -99,7 +99,7 @@ int animationList::addScene(eScene sceneIn, int modifierIn, float speedIn, int d
 void animationList::startRunning(){
     
     isRunning_ = true;
-    nextSceneChangeMS_ = 0;
+    nextSceneChangeMS_ = 0; // should this be millis();
     currentSceneIndex_ = -1;
     logAnilist("starting animation run");
 
