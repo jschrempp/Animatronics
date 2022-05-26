@@ -99,7 +99,7 @@ int animationList::addScene(eScene sceneIn, int modifierIn, float speedIn, int d
 void animationList::startRunning(){
     
     isRunning_ = true;
-    nextSceneChangeMS_ = millis();
+    nextSceneChangeMS_ = 0;
     currentSceneIndex_ = -1;
     logAnilist("starting animation run");
 
@@ -180,8 +180,11 @@ void animationList::process() {
 
             nextSceneChangeMS_ = millis() + timeToFinishScene_ + sceneList_[currentSceneIndex_].delayAfterMoveMS;
 
-        }  // else the scene will change on the very next call to this process() routine
-        
+        } else {  
+            // else the scene will change on the very next call to this process() routine
+            nextSceneChangeMS_ = 0;
+        }
+
         logAnilist.trace("Next scene at: %d",nextSceneChangeMS_);
     }
 
