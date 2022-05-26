@@ -113,7 +113,8 @@ int TPP_AnimateServo::moveTo (int newPos, float newSpeed)  volatile{
               servoNum_, position_, destination_, totalDistance, speed_, movesNeeded, estimatedMSToFinish);
 
 
-    return estimatedMSToFinish;
+    return 0; // estimatedMSToFinish; // XXX
+
 
 };
 
